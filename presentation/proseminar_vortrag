@@ -1,0 +1,136 @@
+
+
+Die naechste Viertelstunde moechte ich auf informierte Suchverfahren die auf Heuristiken basieren, also problemspezifisches Wissen besitzen. naeher eingehen. 
+Dabei handelt es sich um Algorithmen die in vielen Faellen eine bessere durchschnittliche Suchdauer besitzen, waehrend sie, zumindest die vollstaendigen Algorithmen, den schlechtesten Zeitaufwand von O(b^m) besitzen.
+Anschaulich gesprochen weisen die Heuristiken den Algorithmen einen Weg durch den Suchraum, der wahrscheinlich schneller zum Ziel fuehrt als bei konventioneller Herangehensweise.
+
+Man kann die Algorithmen in 2 Gruppen einteilen. Vertreter der ersten Gruppe setzen sich Schritt fuer Schritt die Loesung zusammen, Vertreter der zweiten Gruppe betrachten fertige, nicht unbedingt optimale, Loesungen und versuchen diese iterativ zu verbessern.
+Die Grundidee bei beiden Gruppen ist, dass man jeweils alternative Schritte bzw. Loesungsmoeglichkeiten vergleicht und jeweils moeglichst die waehlt, die auch zu einer optimalen Loesung fuehren.
+Dazu waehlt man eine nicht-negative Funktion h, die einem Zustand n einen Wert zuweist. Je niedriger h(n), desto besser ist der Zustand n. h(n)=0 bedeutet, dass n die optimale Loesung darstellt.
+Ausserdem benoetigen wir eine Funktion i, die uns einen neuen Zustand, also ein Loesungsschritt bzw. eine Loesungsmoeglichkeit, liefert, der wenn moeglich noch nicht betrachtet wurde.
+
+Das Problem zu jeder Aufgabenstellung ist also erst einmal das Finden einer Funktion h und i die das bewerkstelligen. Der Aufgabenstellung nicht angepasste h und is fuehren zu laengerer Laufzeit oder gar zu Sackgassen und Schleifen.
+
+Um beispielsweise von Punkt A zu Punkt B zu kommen, koennte man fuer die Funktion h einfach die Luftlinie und fuer i die Himmelsrichtungen waehlen und direkt auf das Ziel laufen. Man bleibt aber an der Wand stecken, denn will man sich um die Wand herum bewegen, wird der Abstand ja wieder groesser und es ist, zumindest nach der gewaehlten Heuristik, eine schlechtere Loesung.
+
+
+RELAXED PROBLEM!@!!!!!!11111
+
+<BEISPIEL>
+ |
+o|         x
+ |
+
+Wie man dieses Problem loest, werde ich nachher naeher darauf eingehen, zuerst einmal wollen wir das Ganze auf etwas formaler darstellen um das Problem besser fassen zu koennen.
+Grundsaetzlich funktioniert informelle Suche so:
+
+Informierte Suche(Zustand alterZustand)
+	Zustand neuerZustand = i(alterZustand)
+	Falls h(neuerZustand) < h(alterZustand)
+		dann liefere als Ergebnis (Informierte Suche(neuerZustand))
+		sonst liefere als Ergebnis (alterZustand)
+
+Dies stellt nur das Grundgeruest dar, man sieht leicht, dass die Rekursion sofort abgebrochen wird, wenn keine bessere Loesung gefunden wurde.
+Die speziellen Algorithmen loesen das auf unterschiedliche Weise, auf die ich jetzt eingehen moechte:
+
+Bei dem sogenannten Greedy search waehlt die Funktion i den Loesungsschritt, von allen bisher moeglichen Loesungsschritten, die den geringsten Wert fuer h ausweisen.
+Waehlt man fuer h die Luftlinie und wendet greedy search auf das Problem an, den kuerzesten Pfad in einem Graphen zu finden, wird also wie folgt verfahren:
+
+<BEISPIEL>
+
+<1 Verlauf>
+
+<dead end Verlauf>
+
+Wie soeben gesehen ist GREEDY SEARCH also nicht optimal und nicht vollstaendig, wenn man nicht auf Sackgassen und Schleifen prueft. GS hat einen Zeit- und Speicheraufwand von O(b^m) im schlechtesten Fall, fuehrt jedoch in vielen Faellen zu einem guten und schnellen Ergebnis.
+
+Erweitert man im speziellen Fall der Pfadsuche die Funktion h zu jedem Knoten um die Laenge der hinfuehrenden Kante wie beim angesprochenen uniform-cost search,  fuehrt das zu dem sogenannten A* Algorithmus.
+Hier ist also h(n) = Enternung zum Ziel (Luftlinie) + Kantenlaenge
+
+Im speziellen Fall der Pfadsuche wird also jeweils ein moeglichst kurze Kante gewaehlt, dessen Knoten in Luftlinie moeglichst nah am Ziel liegt. 
+In allen anderen Faellen muss erst geprueft werden, ob die heuristische Funktion des Greedy searchs zusammen mit der Funktion des uniform cost Algorithmusses der Dreiecksgleichung gehorcht, also dass a+b>=c.
+
+Beispiel:
+
+o-----o
+  -o-/
+
+Dies laesst sich aber leicht beheben, in dem man jeweils das Maximum von Entfernung Vaterknoten zu Ziel und Knoten zu Ziel nimmt. Einen genauren Beweis findet man in der Literatur.
+Untersuchungen erbrachten die Ergebnisse, dass A* optimal und vollstaendig ist und auch, dass es keinen anderen optimalen und vollstaendigen Algorithmus gibt, der (fuer eine beliebige heuristische Funktion) die Aufgabe mit Expandierung von weniger Knoten schafft.
+A* hat in seiner Grundform ebenfalls einen Zeit und Speicheraufwand von O(b^m), da wie beim Greedy search alle geoeffneten Knoten im Speicher liegen und im schlechtesten Fall auch alle Knoten untersucht werden muessen. der Speicheraufwand laesst sich jedoch mit einem etwas abgewandelten Algorithmus reduzieren.
+
+IMA
+ISP
+CSP
+
+
+
+
+
+Optimal und vollstaendige Algorithmen sind schoen und gut, in der Praxis sind die Probleme jedoch meist zu komplex oder es liegen sowieso keine gesicherten Werte vor, so dass es oft schon reicht, wenn nicht die optimale Loesung sondern nur z.B. eine 5% am Optimum liegende Loesung gefunden werden kann.
+
+Diese Aufgabe koennen die Algorithmen der zweiten Gruppe sehr erfolgreich loesen. Wie anfangs erwaehnt werden bei diesen Algorithmen die Loesung nicht Schritt fuer Schritt aufgebaut sondern fertige Loesungen generiert und diese iterativ verbessert.
+Wichtig ist dabei, dass die Aufgabenstellung so umgeschrieben wird, dass jede Art von Ergebnis gueltig ist, also einer bestimmten Qualitaetsstufe, der sogenannten Fitness, zugeordnet werden kann.
+Dazu werden harte Nebenbedingungen, also z.B. Lagerueberschreitungen, Bargeldueberschreitungen, Zeitueberschreitungen etc. mit Strafkosten belegt, also die Fitness gesenkt, anstatt dass die Loesung ganz verworfen wird.
+
+Der grosse Unterschied zur ersten Gruppe ist aber, dass die neuen Loesungen mehr oder weniger zufaellig generiert werden. Dadurch ergibt sich das Problem, dass man nie genau weiss, ob bei weiteren Durchlaeufen bessere Loesungen gewonnen werden koennen oder nicht.
+
+Grundsaetzlich arbeiten Algorithmen der 2. Gruppe wie folgt:
+
+Wiederhole
+	Loesung neueLoesung = i(alteLoesung)
+	Falls h(neueLoesung)<h(alteLoesung)
+	Dann alteLoesung=neueLoesung
+bis alteLoesung ausreichend gut
+
+Wichtig ist hierbei also wieder die Funktion h und i (auf Basis der alten).
+
+Der einfachste darauf basierende Algorithmus ist der sogenannte Hill-Climbing Algorithmus. Der Name ruehrt von dem anschaulichen Problembeispiel her, dass man sich alleine im Gebirge befindet, im Nebel nichts sehen kann, aufgrund Sauerstoffknappheit sich nicht an seine letzten Schritte erinnern kann und als Ziel hat, den hoechsten Berggipfel zu erreichen.
+Eine moegliche Strategie waere, dass man sich vortastet, ob man denn mit dem naechsten Schritt etwas hoeher kommt oder nicht.
+
+<BILD>
+
+Bei dem Algorithmus ergeben sich aber zwei schwerwiegende Probleme:
+
+1. der Algorithmus wird mit hoher Wahrscheinlichkeit an einem lokalen Optimum haengenbleiben
+
+Dies laesst sich beheben, indem man den Algorithmus nach einiger Zeit ohne Verbesserung einfach mit einer anderen Startkonfiguration/position neu beginnt, die beste Fitness der bisherigen Durchlaeufe aber speichert. Dann nennt man es einen Random-Restart Hillclimbing Algorithmus.
+
+<BILD!>
+
+2. ist die Fitnesslandschaft sehr "wild" also mit grossen Gradientenunterschieden besetzt
+
+Hier hilft auch kein zufaelliges Neustarten mehr, man wird wahrscheinlich fast alle Loesungsmoeglichkeiten durchsuchen muessen, der Algorithmus ist also nicht viel besser als eine einfache zufaellige Suche ueber dem Loesungsraum.
+Dies ist die Hauptschwierigkeit beim Hillclimber. Nicht die Suche selbst sondern die Gestaltung der Problemstellung, so dass eine Fitnesslandschaft mit moeglichst sanften Steigungen entsteht.
+
+<BILD!>
+
+Eine weitere Variante des Hillclimbers waere, anstatt die absoluten Werte der Loesungen zu vergleichen, die Gradienten herzunehmen.
+Bei praktischen Problemen mit hunderten von Variablen erweist sich dies aber als nicht praktikabel, da man hierzu die Ableitung der Fitnessfunktion bestimmen muesste.
+Und wer will schon eine Funktion mit Schleifen, Zufallswerten, Rekursionen und Spruengen differenzieren... :-)
+
+Aehnlich funktioniert auch das sogenannte Simulated Annealing, das urspruenglich aus der Physik kommt.
+Wird eine bessere Loesung gefunden, wird sie wie beim Hillclimber auf jeden Fall weiterverwendet, wird eine schlechtere Loesung gefunden, wird sie nicht sofort verworfen, sondern mit einer Wahrscheinlichkeit die der Parameter T angibt weiterverwendet.
+Ueber die Generationen wird T dabei immer weiter verringert, bis fuer T=0 (hoffentlich) eine ziemlich gute Loesung gefunden wurde.
+
+
+<BILD, Beispiel Transportstrecke zwischen Staedte)
+
+
+O------------O
+|            |
+|            |
+|            |
+|            |
+o------------o
+
+
+Es gibt einige Verfeinerungen des Hill-climbing Algorithmusses, besonders erwaehnenswert sind Genetische Algorithmen/Programmierung und Evolutionaere Algorithmen.
+
+Grob gesagt handelt es sich bei GAs um Hillclimber mit einer Breitensuche in Form von einer Population von "Agenten", mit einer Trennung von Genotyp, also der tatsaechlichen Genstruktur und Phaenotyp, also dem entgueltigen Erscheinungsbild, mit einer Art Gedaechtnis in Form von dominant/rezessiver Gene und inaktiver Gene, sogenannter Introne, die nicht tatsaechlich in einen Phaenotyp codiert werden, sondern nur als Mutationsschutz dienen und mit einer Rekombination durch Crossing Over zwischen den Agenten.
+
+Genauer kann ich leider nicht darauf eingehen, das wuerde den Rahmen des Vortrags sprengen, wer sich damit etwas beschaefitgen will, dem empfehle ich das Buch "Genetic Programming - An introduction".
+
+Sie sind sehr erfolgreich, verglichen mit anderen Suchstrategien, denn welch anderer Algorithmus kann schon Vortraege ueber sich selbst halten?
+
+Das wars, vielen Dank fuer ihre Aufmerksamkeit :-)
