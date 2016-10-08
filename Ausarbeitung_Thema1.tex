@@ -22,7 +22,7 @@
 %Die Ausarbeitung sollte immer eine Einführung in die behandelnden Themen enthalten
 \section{Einleitung}
 
-Das Suchen einer Lösung ist der zentrale Bestandteil der Informatik, ja vielleicht sogar des ganzen Lebens. Von der täglichen Suche nach den Schlüsseln mit Hilfe von Erinnerungsstrategien (,,Wo habe ich sie zuletzt gesehen?``) bis zur Suche nach auserirdischer Intelligenz im Weltraum, immer steht man vor endlos vielen Möglichkeiten.
+Das Suchen einer Lösung ist der zentrale Bestandteil der Informatik, ja vielleicht sogar des ganzen Lebens. Von der täglichen Suche nach den Schlüsseln mit Hilfe von Erinnerungsstrategien (,,Wo habe ich sie zuletzt gesehen?'') bis zur Suche nach auserirdischer Intelligenz im Weltraum, immer steht man vor endlos vielen Möglichkeiten.
 Diese Ausarbeitung wird sich darauf beschränken, Graphenprobleme zu analysieren und verschiedene Algorithmen vorzustellen, die diese effizient lösen können.
 
 Grundlage werden die \emph{allgemeinen} oder auch \emph{informierten Suchverfahren} spielen, die eine Lösung schrittweise zusammensetzen, indem sie den Graphen geschickt durchschreitet und jeweils prüft ob dieser Schritt Teil der Lösung oder die Lösung selbst ist.
@@ -31,6 +31,7 @@ Anschließend werden Algorithmen erläutert, die durch Hinzunahme zusätzlicher Inf
 Es wird auch ein Ausblick auf moderne Suchalgorithmen, den sogenannten \emph{Genetischen Algorithmen} gegeben, die zunehmend Anwendung in der Wirtschaft wie auch in der Wissenschaft finden.
 
 Zusätzlich zu den Beispielen der Pfadsuche durch Graphen werden die Algorithmen anhand von sogenannter \emph{Constraint Satisfaction Problems} erklärt und zum Teil auf deren Schwächen und Stärken eingegangen.
+
 
 \section{Allgemeine Suchverfahren}
 
@@ -45,40 +46,30 @@ Ein universeller \textsc{Tree-Search} Algorithmus kann zur Lösung jedes beliebig
 
 \begin{samepage}
 \textbf{\texttt{\begin{tabbing}\quad\quad\=\quad\quad\=\quad\quad\kill
-function TREESEARCH(problem, fringe) returns a solution, or failure\\
-\>fringe <- INSERT( MAKE-NODE( INITIAL-STATE[problem], fringe))\\
-\>loop do\\
-\>\>if EMPTY?(fringe) then return failure\\
-\>\>node <- REMOVE-FIRST(fringe)\\
-\>\>if GOAL-TEST[problem] applied to STATE[node] succeeds\\
-\>\>then return SOLUTION(node)\\
-\>fringe <- INSERT-ALL( EXPAND(node, problem), fringe)\\
-\\
-function EXPAND(node, problem) returns a set of nodes\\
-\>successors <- the empty set\\
-\>for each <action, result> in SUCCESSOR-FN[problem](STATE[node]) do\\
-\>\>s <- a new NODE\\
-\>\>STATE[s] <- result\\
-\>\>PARENT-NODE[s] <- node\\
-\>\>ACTION[s] <- action\\
-\>\>PATH-COST[s] <- PATH-COST[node] + STEP-COST(node, action, s)\\
-\>\>DEPTH[s] <- DEPTH[node] +1\\
-\>\>Add s to successors\\
-\>Return sucessors
+TREESEARCH(Problem, Queueing-Fn) \\
+\emph{initialisiere} Queue mit Startknoten \\
+\emph{solange} Queue \(\neq\) leer\\
+\{\\
+\>Knoten k = Queue.pop\\
+\>\emph{falls} k Lösung für Problem ist\\
+\>\>\emph{dann liefere als Ergebnis}(Pfad zu k)\\
+\>füge weitere Knoten aus Suchbaum an durch Queueing-Fn vorgesehenen Stelle zu Queue\\
+\}\\
+\emph{liefere als Ergebnis}(Fehler)\\
 \end{tabbing}}}
 \end{samepage}
 
+Die Komplexität hängt vom Verzweigungsfaktor b(\emph{branchingfactor}) des durchsuchten Zustandsraumes und der Tiefe d(\emph{depth}) des Suchbaumes ab.
+Der Verzweigungsfaktor gibt die Anzahl der Verzweigungen pro Knoten an. Mit seiner Hilfe und der Tiefe d lässt sich also leicht eine Obergrenze für die maximale Anzahl der Knoten in einem Suchbaum angeben:
 
-Die Komplexität hängt vom Verzweigungsfaktor b (\emph{branchingfactor}) des durchsuchten Zustandsraumes und der Tiefe d (\emph{depth}) des Suchbaumes ab.
-Der Verzweigungsfaktor gibt die Anzahl der Verzweigungen pro Knoten an. Mit seiner Hilfe und der Tiefe d lässt sich also leicht eine Obergrenze für die maximale Anzahl  der Knoten in einem Suchbaum angeben:
+\begin{displaymath} 1 + b + b^{2} + b^{3} + b^{4} + \dots + b^{d} = \sum_{i=0}^{n} b^{i} \end{displaymath}
 
-%1 + b + \(b^{2}\) + \(b^{3}\) + \(b^{4}\) .... + \(b^{d}\) =  \(\sum {i=0}^{n}\)\qquad \(b^{i}\)
+\subsection{Breitensuche (\textsc{breadth-first search}):}
 
-\subsection{Breitensuche (breadth-first search):}
+Bei der Breitensuche, welche von Moore 1959 zur Lösung von Labyrinthen entwickelt wurde, werden jeweils alle Knoten mit der selben Tiefe durchsucht. Der Suchbaum wird also Ebenenweise durchsucht. Dies lässt sich durch den Aufruf \textsc{Tree-search} (problem, ,,Kinder am Ende anfügen'') bewerkstelliegen.
 
-Bei der Breitensuche, welche von Moore 1959 zur Lösung von Labyrinthen entwickelt wurde, werden jeweils alle Knoten mit der selben Tiefe durchsucht. Der Suchbaum wird also Ebenenweise durchsucht. Dies lässt sich durch den Aufruf \textsc{Tree-search}(problem, FIFO-QUEUE()) (first in , first out) bewerkstelliegen.
-
-%<Picture p74>
+\includegraphics[scale=0.6]{breitensuche.png}
+%<Picture p74>??
 
 \begin{itemize}
 \item \textbf{Vollständig}: Ja, sofern ein Ziel in einer endlichen Tiefe existiert und der Verzweigungsfaktor endlich ist
@@ -89,7 +80,6 @@ Bei der Breitensuche, welche von Moore 1959 zur Lösung von Labyrinthen entwickel
 Beispiel:
 Geg.: Suchbaum mit Knotengröße 1 kbyte und 10 Verzweigungen pro Knoten (b = 10) sowie einem Rechner, der 10.000 Knoten pro Sekunde bearbeitet.
 
-%todo Tabelle
 \begin{tabular}{|l|l|l|l|}
 \hline
 \textbf{Tiefe} & \textbf{Knoten} & \textbf{Dauer} & \textbf{Speicherverbrauch}\\
@@ -109,81 +99,80 @@ Geg.: Suchbaum mit Knotengröße 1 kbyte und 10 Verzweigungen pro Knoten (b = 10) 
 14 & \(10^{15}\) & 3523 y & 1 E(xa)b\\
 \hline
 \end{tabular}
-\textit{ Beispiel aus ~\cite{Norv03} }
+\textit{ Beispiel aus ~\cite{Norv03tab} }
 %Artificial Intelligence A modern Approach von Stuart Russel und Peter Norvig Seite 74} 
 
+\subsection{\textsc{Uniform-cost Search}}
 
-\subsection{Uniform-cost Search}
-
-Bei dieser Art der Suche, welche auf dem kürzesten weg zwischen 2 Punkten Algorithmus von Dijkstra  aus dem Jahre 1959 beruht, wird immer der Knoten mit den niedrigsten Pfadkosten gewählt, unterscheiden sich die Pfadkosten also nicht liegt eine normale Breitensuche vor. Wenn dieser Algorithmus auf eine Schleife mit den Pfadkosten 0 stösst, bleibt er dort stecken. Daraus resultiert folgendes:
+Bei dieser Art der Suche, welche auf dem kürzesten Weg zwischen 2 Punkten Algorithmus von \textsc{Dijkstra}  aus dem Jahre 1959 beruht, wird immer der Knoten mit den niedrigsten Pfadkosten gewählt, unterscheiden sich die Pfadkosten also nicht liegt eine normale Breitensuche vor. Wenn dieser Algorithmus auf eine Schleife mit den Pfadkosten 0 stößt, bleibt er dort stecken. Daraus resultiert folgendes:
 
 \begin{itemize}
 \item \textbf{Vollständigkeit und Optimalität}: Sofern alle Pfadkosten \(\geq\) e \textgreater 0
-\item \textbf{Zeit-/Speicheraufwand}: O(\(b^{top(C*/e)}\)) wobei C* den kosten für die optimale Lösung entspricht -> Es werden viele kleine Schritte bevorzugt, auch wenn diese nicht zum gewünschten Ziel führen.
+\item \textbf{Zeit-/Speicheraufwand}: O(\(b^{top(C*/e)}\)) wobei C* den Kosten für die optimale Lösung entspricht \(\rightarrow\) Es werden viele kleine Schritte bevorzugt, auch wenn diese nicht zum gewünschten Ziel führen.
 \end{itemize} 
 
+\subsection{Tiefensuche (\textsc{Depth-first search})}
 
-\subsection{Tiefensuche (Depth-first search)}
+Bei der Tiefensuche wird zunächst der tiefste Knoten im aktuellen Teilstück des Suchbaumes gewählt. Sollte ein Knoten keine (noch nicht durchsuchten) Kinder haben, so sprint der Algorithmus zum Vater dieses Knoten zurück. Alle durchsuchten Knoten, die nicht zwischen Wurzel und aktuellem Knoten liegen, werden fallengelassen. Tiefensuche entspricht also dem Aufruf \textsc{Tree-Search}(problem, ,,Kinder am Anfang einfügen'').
 
-Bei der Tiefensuche wird zunächst der tiefste Knoten im aktuellen Teilstück des Suchbaumes gewählt. Sollte ein Knoten keine (noch nicht durchsuchten) Kinder haben, so sprint der Algorithmus zum Vater dieses Knoten zurück. Alle durchsuchten Knoten, die nicht zwischen Wurzel und aktuellem Knoten liegen, werden fallengelassen. Tiefensuche entspricht also dem Aufruf \textsc{Tree-Search}(problem, LIFO-QUEUE()) (last in, first out).
+%Picture p76???
 
-Picture p76
+\includegraphics[scale=0.6]{tiefensuche.png}
+
 \begin{itemize}
 \item \textbf{Vollständig}: Nur, wenn der Suchbaum ausschließlich Äste endlicher Länge  enthält.
 \item \textbf{Optimal}: Nein
 \item \textbf{Zeitaufwand}: O(\(b^{d+1}\))
-\item \textbf{Speicheraufwand}: O( b*m ) im Sonderfall backtracking search: O(m)
+\item \textbf{Speicheraufwand}: O(\(b*m\)) im Sonderfall backtracking search: O(m)
 \textit{(m sei die maximale Suchtiefe)}
 \end{itemize}
 
 
-\subsection{Begrenzte Tiefensuche (Depth-limited search)}
+\subsection{Begrenzte Tiefensuche (\textsc{Depth-limited search})}
 
-Depthlimited search ist eine Tiefensuche mit eine maximalen Suchtiefe l. Alle Knoten der Tiefe l werden behandelt, als besäßen sie keine Kinder. Tiefensuche entspricht damit DLS mit l = unendlich.
+Depthlimited search ist eine Tiefensuche mit eine maximalen Suchtiefe l. Alle Knoten der Tiefe l werden behandelt, als besä"sen sie keine Kinder. Tiefensuche entspricht damit DLS mit l = unendlich.
 
 \begin{itemize}
 \item \textbf{Vollständig}: Nur wenn gilt l \(\geq\) m
 \item \textbf{Optimal}: Nur wenn gilt l = d
 \item \textbf{Zeitaufwand}: O(\(b^{l}\))
-\item \textbf{Speicheraufwand}: O(bl)
+\item \textbf{Speicheraufwand}: O(\(b*l\))
 \end{itemize}
 
 \begin{samepage}
 \textbf{\texttt{\begin{tabbing}\quad\quad\=\quad\quad\=\quad\quad\kill
-Function DEPTH-LIMITED-SEARCH(problem, limit) returns a solution, or failure/cutoff\\
-\>Return RECURSIVE-DLS( MAKE-NODE( INITIAL-STATE[problem]), problem, limit)\\
+DEPTH-LIMITED-SEARCH(Problem, Limit)\\
+\emph{liefere als Ergebnis}(RECURSIVE-DLS(Startknoten, Problem, Limit))\\
 \\
-Function RECURSIVE-DLS(node, problem, limit) returns a solution or failure/cutoff\\
-\>Cutoff\_occurred? <- false\\
-\>If GOAL-TEST[problem](STATE[node]) then return SOLUTION(node)\\
-\>Else if DEPTH[node] = limit then return cutoff\\
-\>Else for each successor in EXPAND(node, problem) do\\
-\>\>Result <- RECURSIVE-DLS(successor, problem, limit)\\
-\>\>If result = cutoff then cutoff\_occurred? <- true\\
-\>\>Else if result \(\neq\) failure then return result\\
-\>If cutoff\_occurred? Then return cutoff else failure
+RECURSIVE-DLS(Knoten, Problem, Limit)\\
+\emph{falls} Knoten Lösung für Problem\\
+\>\emph{dann liefere als Ergebnis}(Knoten)\\
+\emph{falls} wir tiefer sind als das Limit\\
+\>\emph{dann liefere als Ergebnis}(Cutoff)\\
+\emph{rufe} RECURSIVE-DLS für die Kinder des Knotens auf
 \end{tabbing}}}
 \end{samepage}
 
-
-\subsection{Iterativ vertiefende Tiefensuche (iterative deepening depth-first search)}
+\subsection{Iterativ vertiefende Tiefensuche (\textsc{iterative deepening depth-first search})}
 
 Bei dieser Art der Suche handelt es sich um eine begrenzte Tiefensuche, welche erstmals von Slate und Atkin 1977 für ein Schachprogramm verwendet wurde, deren Tiefenlimit l Schrittweise erhöht wird, bis l=d gilt, also eine Lösung gefunden wurde.
-
-<Picture p79>
 
 \begin{itemize}
 \item \textbf{Vollständig}: Ja, sofern ein Ziel in einer endlichen Tiefe existiert und der Verzweigungsfaktor endlich ist
 \item \textbf{Optimal}: Ja, sofern alle Pfadkosten identisch sind
-\item \textbf{Speicheraufwand}: O(b*d)
+\item \textbf{Speicheraufwand}: \(O(b*d)\)
 \end{itemize}
+
+\includegraphics[scale=0.6]{iterativ.png}
 
 Man beachte, dass IDS durch das wiederholte Erzeugen vieler Knoten augenscheinlich zwar verschwenderisch wirkt, sich aber bei genauerer Betrachtung folgender Vergleich zwischen Breitensuche und IDS ergibt:
 
-N(IDS) = (d)b + (d-1)\(b^{2}\) + ... + (1)\(b^{d}\) =sumi 1 bis d ((d-i)\(b^{d}\))
-N(BFS)= b + \(b^{2}\) +                 ... + b exp (d) + \(b^{d+1}\)  b=sumi 1 bis d+1 (\(b^{i}\)) b
+%\begin{tabbing}\quad\quad\quad\quad\=\quad\quad\quad\quad\kill
+\begin{displaymath} N(IDS) = (d) * b + (d-1) * b^{2} + \dots + (1) * b^{d} = \sum_{i=1}^{d} (d-i) * b^{d} \end{displaymath}\\
+\begin{displaymath} N(BFS) = b + b^{2} + \dots + b^{d} + b^{d+1} = \sum_{i=1}^{d+1} b^{i} - b \end{displaymath}\\
+%\end{tabbing}
 
-Da gilt sumi 1 bis d((d-1-i)b\(^{2}\)) < \(b^{d+1}\) ist IDS also tatsächlich schneller als BFS und es ergibt sich ein
+Da gilt \(\sum_{i=1}^{d}\) ((d-1-i)b\(^{2}\)) \textless \(b^{d+1}\) ist IDS also tatsächlich schneller als BFS und es ergibt sich ein
 
 \begin{itemize}
 \item \textbf{Zeitaufwand}: O(\(b^{d}\))
@@ -193,19 +182,20 @@ Aus diesem Grund ist IDS häufig der bevozugte Suchalgorithmus, wenn die Tiefe d 
 
 \begin{samepage}
 \textbf{\texttt{\begin{tabbing}\quad\quad\=\quad\quad\=\quad\quad\kill
-Function ITERATIVE-DEEPENING-SEARCH(problem) returns a solution, or failure\\
-\>Inputs: problem\\
-\\
-\>For depth <- 0 to inf do\\
-\>\>Result <- DEPTH-LIMITED-SEARCH(problem, depth)\\
-\>\>If result != cutoff then return result
+ITERATIVE-DEEPENING-SEARCH(Problem)\\
+\emph{für} Tiefe = 0 \emph{bis} unendlich\\
+\{\\
+\>Resultat = DEPTH-LIMITED-SEARCH(problem, depth)\\
+\>\emph{falls} Resultat \(\neq\) Cutoff\\
+\>\>\emph{dann liefere als Ergebnis}(Resultat)\\
+\}
 \end{tabbing}}}
 \end{samepage}
 
 
-\subsection{Bidirektionale Suche (Bidirectional search)}
+\subsection{Bidirektionale Suche (\textsc{Bidirectional search})}
 
-Die Hauptidee hinter der 1969, 1971 von Pohl entwickelten bidirektionalen Suche liegt darin, das 2*(\(b^{(d/2)}\)) wesentlich kleiner ist als (\(b^{d}\)) bzw die Fläche zweier kleiner Kreise kleiner als die eines großen Kreises. Bei der bidirektionalen Suche werden 2 Breitensuchen eingesetzt, die jeweils vom Ausgangszustand und Ziel starten und einander suchen. Die Überprüfung ob ein Knoten bereits von der anderen suche gefunden wurde, findet dabei mit einer Hashtabelle statt. Das Ziel muss dazu jedoch eindeutig bestimmt sein und die Suchfunktion muss die Generierung des Vorgängers eines Knotens zulassen, wie dass zum Beispiel beim 8 Puzzle oder Rubikwürfel(???) der Fall ist. Schach hingegen ist auf diese Art und Weise nicht lösbar, da in diesem Fall eine Grosse Menge an möglichen Suchzielen existiert.
+Die Hauptidee hinter der 1969, 1971 von Pohl entwickelten bidirektionalen Suche liegt darin, das \(2*(b^{d/2})\) wesentlich kleiner ist als (\(b^{d}\)) bzw die Fläche zweier kleiner Kreise kleiner als die eines großen Kreises. Bei der bidirektionalen Suche werden 2 Breitensuchen eingesetzt, die jeweils vom Ausgangszustand und Ziel starten und einander suchen. Die Überprüfung ob ein Knoten bereits von der anderen suche gefunden wurde, findet dabei mit einer Hashtabelle statt. Das Ziel muss dazu jedoch eindeutig bestimmt sein und die Suchfunktion muss die Generierung des Vorgängers eines Knotens zulassen, wie dass zum Beispiel beim 8 Puzzle oder Rubikwürfel der Fall ist. Schach hingegen ist auf diese Art und Weise nicht lösbar, da in diesem Fall eine große Menge an möglichen Suchzielen existiert.
 
 \begin{itemize}
 \item \textbf{Vollständig}: Ja
@@ -217,46 +207,61 @@ Die Hauptidee hinter der 1969, 1971 von Pohl entwickelten bidirektionalen Suche 
 
 \subsection{Unterbindung von Schleifen bei der Suche}
 
-Ein großes Problem ist die Möglichkeit, dass zB bei dem durchsuchen eines Graphen ein Suchalgorithmus einige Suchstadien evtl mehrmals durchlauft und somit viele redundante Pfade ablauft.
+Ein großes Problem ist die Möglichkeit, dass z.B. bei dem durchsuchen eines Graphen ein Suchalgorithmus einige Suchstadien evtl mehrmals durchläuft und somit viele redundante Pfade ablauft.
 Bei einer Tiefensuche lässt sich ein Teil der Wiederholungen durch das Vergleichen des aktuellen Knotens mit seinen Vorgängern vermeiden. Will man jedoch alle Redundanten Pfade ausschließen, so benötigt man eine alle bereits besuchten Knoten enthaltende Hashtable um jeden neuen Knoten auf Wiederholung zu untersuchen. Man beachte hierbei, dass diese Hashtable den linearen Speicheraufwand von Tiefensuche und IDS zunichte macht.
 
 \begin{samepage}
 \textbf{\texttt{\begin{tabbing}\quad\quad\=\quad\quad\=\quad\quad\kill
-Function GRAPH-SEARCH(problem, fringe) returns a solution, or failure\\
-\>Closed <- an empty set\\
-\>Fringe <- INSERT( MAKE-NODE( INITIAL-STATE[problem], fringe))\\
-\>Loop do\\
-\>\>If EMPTY?(fringe) then return failure\\
-\>\>Node <- REMOVE-FIRST(fringe)\\
-\>\>If GOAL-TEST[problem](STATE[node]) then return SOLUTION(node)\\
-\>\>If STATE[node] is not in closed then\\
-\>\>Add STATE[node] to closed\\
-\>\>Fringe <- INSERT-ALL( EXPAND( node, problem), fringe)
-%2x 1 Tab rausgenommen
+GRAPH-SEARCH(Problem, Queueing-Fn)\\
+\emph{initialisiere} Queue \emph{mit} Startknoten\\
+\emph{initialisiere} leere Liste der abgearbeiteten Knoten\\
+\emph{solange} Queue \(\neq\) leer\\
+\{\\
+\>Knoten k = Queue.pop\\
+\>\emph{falls} k Lösung für Problem\\
+\>\>\emph{dann liefere als Ergebnis}(Pfad zu k)\\
+\>\emph{falls} k nicht in Liste der abgearbeiteten Knoten ist\\
+\>\>\emph{dann} füge k zu Liste der abgearbeiteten Knoten hinzu\\
+\>\emph{wähle} weitere Knoten aus Suchbaum \(\notin\) Liste der abgearbeiteten Knoten\\
+\>Füge ausgewählte Knoten an durch Queueing-Fn vorgesehene Stelle zu Queue\\
+\}\\
+\emph{liefere als Ergebnis}(Fehler)
 \end{tabbing}}}
 \end{samepage}
 
 
-\subsection{Constraint Satisfaction Problems}
+\subsection{\textsc{Constraint Satisfaction Problems}}
 
 Ein CSP besteht auf seiner Menge von Variablen mit und einer Menge von Anforderungen/Abhängigkeiten. CSP haben die gemeinsame Eigenschaft, dass sie sich in einem Abhängigkeitsgraphen (constraint graph) darstellen lassen.
 
 Da CSP eine bestimmte Menge an Variablen besitzen, die alle belegt werden möchten, ist uns auch die Suchtiefe unseres Suchbaumes bekannt. Auf jeder Ebene des Suchbaumes wird nämlich eine Variable belegt. Das wiederum hat zur Folge, das Formen der Tiefensuchen eine beliebte Möglichkeit sind, CSPs zu Lösen.
 
 Die einfachste Form von CSP haben nur dikrete Variablen, bei denen die Belegungsmöglichkeiten für jede einzelne Variable endlich sind wie z.B. 4-Damen. Der Verzweigungsfaktor für diese Art von CSP ist maximal gleich der Anzahl der Belegungsmöglichkeiten für die einzelnen Variablen.
-Ausserdem lassen sie diese grundsätzlich auf Boolean CSPs zurückführen. Aufgrund der Tatsache, dass es sich aber z.B. bei dem SAT Problem um ein CSP handelt, welches NP-Vollständig ist, können wi 
+Ausserdem lassen sie diese grundsätzlich auf Boolean CSPs zurückführen. Aufgrund der Tatsache, dass es sich aber z.B. bei dem SAT Problem um ein CSP handelt, welches NP-Vollständig ist, können wir nicht davon Ausgehen, CSP Probleme grundsätzlich in weniger als expotentieller Zeit zu lösen.
+                                                                                                      
+Zudem kommen CSPs, welche z.B. auf den natürlichen Zahlen arbeiten und damit zwar diskrete Werte haben, aber unendlich viele Belegungsmöglichkeiten. Als Beispiel lässt sich ein z.B. Terminkalender Angeben. Da wir bei solchen Problemen nicht alle Lösungsmöglichkeiten aufzählen also man einen Termin z.B. bis ins unendliche nach hinten verschieben kann, werden zur Lösung solcher Probleme Constraint Languages verwendet. In unserem Beispiel bedeutet das soviel, wie Termin1+2h \(\geq\) Termin 2 etc.
+                                                                                                      
+Auf die noch komplexeren CSP mÃ¶chten wir hier aufgrund unseres begrenzten Umfanges nicht eingehen.
 
-\subsection{Backtracking Search}
+\subsection{\textsc{Backtracking Search}}
 
-Bei dieser Form der Suche wird die Tatsache genutzt, dass bei einer gültiogen Lösung für ein CSP alle Bedingungen des CSP erfüllt sein müssen. Verletzen also 1 oder mehr Variablen ein der Bedingungen, so folgt daraus zwangsläufig, dass jeder Versuch die restlichen Variablen zu belegen nicht mehr zu einer gültigen Lösung führen kann. Daher wird beim Backtracking eine Tiefensuche Angewendet, also die Variablen nacheinander belegt. Nach jeder neu belegten Variable überprüft der Algorithmus, ob die Momentane belegung noch gültig ist. Ist sie dies, setzt er seine Suche bei der nächsten Variable fort. Ist sie ungültig, wird springt er einen Schritt im Suchbaum zurück und belegt versucht es mit einem anderen Kind, also Testet eine alternative Belegung. Falls keine solche existiert, so steigt er im Suchbaum einfach um noch eine Ebene Auf und versucht es dort nocheinmal. Wir wollen dies am 4 Damen Problem erleutern.
+Bei dieser Form der Suche wird die Tatsache genutzt, dass bei einer gültigen Lösung für ein CSP alle Bedingungen des CSP erfüllt sein müssen. Verletzen also 1 oder mehr Variablen ein der Bedingungen, so folgt daraus zwangsläufig, dass jeder Versuch die restlichen Variablen zu belegen nicht mehr zu einer gültigen Lösung führen kann. Daher wird beim Backtracking eine Tiefensuche Angewendet, also die Variablen nacheinander belegt. Nach jeder neu belegten Variable überprüft der Algorithmus, ob die Momentane belegung noch gültig ist. Ist sie dies, setzt er seine Suche bei der nächsten Variable fort. Ist sie ungültig, wird springt er einen Schritt im Suchbaum zurück und belegt versucht es mit einem anderen Kind, also Testet eine alternative Belegung. Falls keine solche existiert, so steigt er im Suchbaum einfach um noch eine Ebene Auf und versucht es dort nocheinmal. Wir wollen dies am 4 Damen Problem erläutern.
 
 Gegeben sei zunächst ein 4x4 Feld. Wir unterteilen dieses in 4 Spalten welche unsere 4 Variablen (a,b,c,d) seien. Jede dieser Spalten hat 4 Felder, woraus die mögliche Variablenbelegung resultiert, also 1,2,3,4.
 
 Unser Algorithmus belegt zunächst die erste Variable a mit 1. Danach die zweite b auch mit 1. Wir befinden uns also auf der 3ten Ebene unseres Suchbaumes. Die nun Folgende Prüfung auf Konsitenz bzgl. der Anforderungen des 4-Damen Problemes (keine Dame darf die andere Schlagen können) ergibt, dass es sich nicht um eine gültige belegung handelt (Abb. a) Also springt der Algorithmus einfach um eine Ebene zurück und belegt testet ein neues Kind. Das bedeutet, er belegt b mit 2 (Abb. b). Dieser Prozess setzt sich nun so lange fort (Abb. c) , bis der Algorithmus es geschafft hat, eine Kombination zu finden, bei der erstens alle Variablen belegt sind, also er sich in der niedrigsten Ebene des Suchbaumes befindet und zusätzlich die Bedingungen des n-Damenproblems erfüllt sind (Abb d). 
 
-\subsection{Forward checking}
 
-Forward checking ist eine Methode um die Anzahl der Sackgassen, in welche ein Backtracking Algorithmus läuft zu verringern. Beim Forward Checking werden jeweils die Werte, welche zu einem nicht Erfüllen der Abhängigkeiten führen würden Aus einer Liste der Möglichen Werte für die von der aktuell bearbeiteten Variable entfernt. Beim 4 Damen Problem würde das bedeuten: Nachdem Spalte a die 1 zugeordnet wurde, das diese aus den Übrigen entfernt wird. Des weiteren werden aus b die 2, aus c die 3 und aus d die 4 entfernt. Danach wird im nächsten Schritt Spalte b die 3 zugeordnet, denn 1 und 2 stehen ja nicht mehr zur Verfügung.
+\includegraphics[scale=0.6]{ndame1.png}
+\includegraphics[scale=0.6]{ndame2.png}
+
+\subsection{\textsc{Forward checking}}
+
+Forward checking ist eine Methode um die Anzahl der Sackgassen, in welche ein Backtracking Algorithmus läuft zu verringern. Beim Forward Checking werden jeweils die Werte, welche zu einem nicht Erfüllen der Abhängigkeiten führen würden Aus einer Liste der Möglichen Werte für die von der aktuell bearbeiteten Variable entfernt. Beim 4 Damen Problem würde das bedeuten: Nachdem Spalte a die 1 zugeordnet wurde, das diese aus den Übrigen entfernt wird. Des weiteren werden aus b die 2, aus c die 3 und aus d die 4 entfernt. Danach wird im nächsten Schritt Spalte b die 3 zugeordnet, denn 1 und 2 stehen ja nicht mehr zur Verfügung.\\
+\includegraphics[scale=0.6]{ndamef1.png}
+\includegraphics[scale=0.6]{ndamef2.png}\\
+\includegraphics[scale=0.6]{ndamef3.png}
+
 
 \newpage
 \section{Heuristische Suchverfahren}
@@ -270,14 +275,14 @@ Man kann die Algorithmen in 2 Gruppen einteilen. Vertreter der ersten Gruppe set
 Die Grundidee bei beiden Gruppen ist, dass man jeweils alternative Schritte bzw. Lösungsmöglichkeiten vergleicht und jeweils möglichst die wählt, die auch zu einer optimalen Lösung führen.
 Dazu wählt man eine nicht-negative Heuristikfunktion h, die einem Zustand n einen Wert zuweist. Je niedriger h(n), desto besser ist der Zustand n. h(n)=0 bedeutet, dass n die optimale Lösung darstellt.
 Ausserdem benötigen wir eine Auswahlfunktion i, die uns einen neuen Zustand, also ein Lösungsschritt der bzw. eine Lösungsmöglichkeit die wenn möglich noch nicht betrachtet wurde, zurückgibt.
-Das Problem zu jeder Aufgabenstellung ist also erst einmal das Finden einer Funktion h und i die das bewerkstelligen. Eine der Aufgabenstellung nicht angepasste Heuristik und Auswahlfunktion führen zu längerer Laufzeit oder gar zu Sackgassen und Schleifen.
+Das Problem zu jeder Aufgabenstellung ist also erst einmal das Finden einer Funktion h und i die das bewerkstelligen. Eine der Aufgabenstellung nicht angepaßte Heuristik und Auswahlfunktion führen zu längerer Laufzeit oder gar zu Sackgassen und Schleifen.
 
 \subsection{Finden einer heuristischen Funktion} 
 %~~
 
 Um eine Funktion h zu finden, die den Suchvorgang möglichst verkürzt, bietet es sich an, ein sogenanntes \textsc{Relaxed Problem}, also ein vereinfachtes Problem zu betrachten, bei dem bestimmte Beschränkungen in der Lösungsschrittwahl aufgehoben sind. Damit erhalten wir eine mögliche Bewertung eines Lösungsschritt, wie weit wir von der optimalen Lösung entfernt sind.
 
-Als Beispiel betrachten wir das sogenannte \textsc{8-puzzle} ~\cite{Norv03} Problem:
+Als Beispiel betrachten wir das sogenannte \textsc{8-puzzle} ~\cite{Norv038P} Problem:
 
 \begin{figure}[h]
 \includegraphics[scale=0.5]{8puz1.png}
@@ -287,11 +292,11 @@ Als Beispiel betrachten wir das sogenannte \textsc{8-puzzle} ~\cite{Norv03} Prob
 Beim \textsc{8-puzzle} Problem ist das Ziel, die Teile so zu bewegen, dass man vom Startzustand ausgehend den Zielzustand erreicht.
 Die Beschränkung ist hierbei, dass man immer nur 1 Teil bewegen darf und sich niemals 2 Teile auf einem Feld befinden dürfen.
 
-Da sich in jedem Schritt 2 (freies Feld in der Ecke), 3 (freies Feld am Rand) oder 4 (freies Feld in der Mitte) Teile bewegen dürfen, würde eine komplette Suche aller Möglichkeiten mit Zugtiefe 20 zu 3.5*\(10^{9}\) oder, ignoriert man sich wiederholende Situationen, zu 9! Zustände führen. ~\cite{Norv03}
+Da sich in jedem Schritt 2 (freies Feld in der Ecke), 3 (freies Feld am Rand) oder 4 (freies Feld in der Mitte) Teile bewegen dürfen, würde eine komplette Suche aller Möglichkeiten mit Zugtiefe 20 zu \(3.5*10^{9}\) oder, ignoriert man sich wiederholende Situationen, zu 9! Zustände führen. ~\cite{Norv03}
 
 Wie stellen wir nun fest, ob wir uns beim Bewegen eines Teiles auf die optimale Lösung zu bewegen oder uns entfernen?
 Beim Ursprungsproblem können wir nur feststellen, ob ein Zustand dem Zielzustand entspricht oder nicht.
-Wir müssen also ein vereinfachtes, sogenanntes \textsc{relaxed problem} finden, so dass Überschreitungen von Beschränkungen nicht zu einem Ignorieren des Lösungsschritt bzw. der Lösung führt.
+Wir müssen also ein vereinfachtes, sogenanntes \textsc{relaxed problem} ~\cite{Norv03SC} finden, so dass Überschreitungen von Beschränkungen nicht zu einem Ignorieren des Lösungsschritt bzw. der Lösung führt.
 
 Zuerst listen wir die Beschränkungen noch einmal getrennt auf:
 
@@ -304,13 +309,12 @@ Ein Teil darf
 verschoben werden
 
 Heben wir in diesem Fall die Beschränkung 3 einfach auf, dürfen sich also Teile auch auf besetze Felder bewegen, wissen wir, dass die Summe der Schritte der Teile von ihren aktuellen Positionen zu den Zielpositionen die minimale Zahl der Schritte ist, die wir zur optimalen Lösung benötigen.
-In diesem speziellen Fall wird das Manhattan distance genannt ~\cite{Norv03}
-%[4, Seite 102]
+In diesem speziellen Fall wird das Manhattan distance genannt ~\cite{Norv03MHD}
+
 Hebt man zusätzlich noch Beschränkung 1 auf, erhält man eine Heuristik, die die Zahl der Teile die sich an falscher Position befinden beschreibt.
+Nach ~\cite{Norv03SC} ist die erste Heuristik der zweiten Heuristik mit weniger Beschränkungen überlegen, führt also zu einer Suche mit geringerer durchschnittlichen Suchdauer.
 
-Nach ~\cite{Norv03} ist die erste Heuristik der zweiten Heuristik mit weniger Beschränkungen überlegen, führt also zu einer Suche mit geringerer durchschnittlichen Suchdauer.
-
-Prüft man alle Kombinationen von Beschränkungsaufhebungen erreicht man so eine für das jeweilige Problem optimale Lösung. Diesen Weg beschreitet \textsc{Absolver}. ~\cite{Norv03}
+Prüft man alle Kombinationen von Beschränkungsaufhebungen erreicht man so eine für das jeweilige Problem optimale Lösung. Diesen Weg beschreitet \textsc{Absolver}. ~\cite{Norv03ABS}
 \\
 
 \begin{figure}
@@ -330,8 +334,8 @@ Hat man nun eine heuristische Funktion gefunden kann man diese nun in einer Such
 Das Grundgerüst der informellen Suche sieht erst einmal so aus:
 \begin{samepage}
 \textbf{\texttt{\begin{tabbing}\quad\quad\=\quad\kill
-\textsc{Heuristische Suche}(Zustand alterZustand)\\
-\emph{Solange} erstelleNeuenZustand(alterZustand,Bewertung()) \(\neq\) NULL\\
+HEURISTISCHE SUCHE(Zustand alterZustand)\\
+\emph{solange} erstelleNeuenZustand(alterZustand,Bewertung()) \(\neq\) NULL\\
 \>Zustand neuerZustand = erstelleNeuenZustand(alterZustand,Bewertung())\\
 \emph{liefere als Ergebnis}(alterZustand)
 \end{tabbing}}}
@@ -346,21 +350,21 @@ Auf einige Beispiele für mögliche h und i Funktionen wird nun in den nächsten be
 \newpage
 \section{Algorithmen 1. Gruppe - Schrittweiser Aufbau}
 %~~best first search ueberhaupt erwaehnen? evtl 1. Gruppe in "best-first search" umbenennen
-\subsection{Greedy Search}
+\subsection{\textsc{Greedy Search}}
 
 Bei dem sogenannten \textsc{Greedy Search} wählt die Funktion i den Lösungsschritt, von dem in der Funktion übergebenen Zustand \emph{alterZustand}, bei dem der Startknoten geöffnet ist, möglichen Lösungsschritten, die den geringsten Wert für h ausweisen. Es werden also nacheinander Knoten geöffnet und die Bewertung aller Söhne des jeweiligen Knotens miteinander verglichen. Der Knoten mit geringster Bewertung wird ausgewählt und geöffnet usw.
 \begin{samepage}
 \textbf{\texttt{\begin{tabbing}\quad\quad\=\quad\kill
-\textsc{Greedy Search}(Zustand alterZustand)\\
-\emph{Solange} erstelleNeuenZustand(alterZustand,Bewertung()) \(\neq\) NULL\\
+GREEDY SEARCH(Zustand alterZustand)\\
+\emph{solange} erstelleNeuenZustand(alterZustand,Bewertung()) \(\neq\) NULL\\
 \>Zustand neuerZustand = erstelleNeuenZustand(alterZustand,Bewertung())\\
 \emph{liefere als Ergebnis}(alterZustand)\\
 \\
-Zustand erstelleNeuenZustand(Zustand momentanerZustand,Bewertung())\\
+Zustand \emph{erstelleNeuenZustand}(Zustand momentanerZustand,Bewertung())\\
 Knoten n = min(Bewertungsfunktion(geöffnete Knoten von momentanerZustand))\\
 momentanerZustand = SchließeAlleKnoten(momentanerZustand) \\
 %~~
-\emph{Falls} öffneKnoten(momentanerZustand,n) \(\neq\) momentanerZustand\\
+\emph{falls} öffneKnoten(momentanerZustand,n) \(\neq\) momentanerZustand\\
 \>\emph{liefere als Ergebnis}(öffneKnoten(momentanerZustand,n))
 \end{tabbing}}}
 \end{samepage}
@@ -393,7 +397,7 @@ Leider hat der Algorithmus ein paar Nachteile:
 \caption{\textsc{Greedy Search} ist anfällig gegenüber Schleifen}
 \end{figure}
 Der \textsc{Greedy Search} Algorithmus ist weder optimal noch vollständig, führt jedoch in einigen Fällen zu einem relativ guten und schnellen Ergebnis.
-In der Grundform hat der \textsc{Greedy search} Algorithmus einen Speicheraufwand von O(m), da nur der Weg zum Ziel und alle Söhne des aktuell geöffneten Knotens betrachtet werden. Prüft man auf Sackgassen und Schleifen, steigt der Speicheraufwand von O(b+m) auf O(\(b^{m}\)), wird aber trotzdem nicht optimal, wie in Abbildung 1.4 gezeigt und auch nicht vollständig, da er bei Graphen mit unendlich langen Pfaden nie terminiert. Mit Gedächtnis hat er einen Zeitaufwand im schlechtesten Fall von O(\(b^{m}\)), da immer wieder rückgesprungen wird bis zwangsläufig alle Knoten (in einem endlichen Graphen) untersucht wurden.
+In der Grundform hat der \textsc{Greedy search} Algorithmus einen Speicheraufwand von O(m), da nur der Weg zum Ziel und alle Söhne des aktuell geöffneten Knotens betrachtet werden. Prüft man auf Sackgassen und Schleifen, steigt der Speicheraufwand von O(b+m) auf O(\(b^{m}\)), wird aber trotzdem nicht optimal, wie in Abbildung 1.5 und 1.6 gezeigt und auch nicht vollständig, da er bei Graphen mit unendlich langen Pfaden nie terminiert. Mit Gedächtnis hat er einen Zeitaufwand im schlechtesten Fall von O(\(b^{m}\)), da immer wieder rückgesprungen wird bis zwangsläufig alle Knoten (in einem endlichen Graphen) untersucht wurden.
 
 
 \subsection{\textsc{Greedy Search} mit \textsc{CSPs}}
@@ -412,7 +416,7 @@ Hier nun ein weiteres Beispiel zu \textsc{Greedy Search} in Verbindung mit dem \
 
 \begin{figure}[h]
 \includegraphics[scale=0.7]{e16.png}\includegraphics[scale=0.7]{e17.png}\includegraphics[scale=0.7]{e18.png}\\
-\caption{"Die Schweiz und dann Österreich werden mit 2 Punkten, Italien danach mit 3 Punkten gewählt, der Rest wird aufgefüllt}
+\caption{Die Schweiz und dann Österreich werden mit 2 Punkten, Italien danach mit 3 Punkten gewählt, der Rest wird aufgefüllt}
 \end{figure}
 
 \newpage
@@ -424,20 +428,20 @@ Dadurch treten nun keine Schleifen und Sackgassen mehr auf, es wird einfach an d
 %~~~ Gedächtnis rausnehmen also naja...
 \begin{samepage}
 \textbf{\texttt{\begin{tabbing}\quad\quad\=\quad\kill
-\textsc{A* Search}(Zustand alterZustand)\\
-\emph{Solange} erstelleNeuenZustand(alterZustand,Bewertung()) \(\neq\) NULL\\
+A* SEARCH(Zustand alterZustand)\\
+\emph{solange} erstelleNeuenZustand(alterZustand,Bewertung()) \(\neq\) NULL\\
 \>Zustand neuerZustand = erstelleNeuenZustand(alterZustand,Bewertung())\\
 \emph{liefere als Ergebnis}(alterZustand)\\
 \\
-Zustand erstelleNeuenZustand(Zustand momentanerZustand,Bewertung())\\
+Zustand \emph{erstelleNeuenZustand}(Zustand momentanerZustand,Bewertung())\\
 Knoten n = min(Bewertungsfunktion(geöffnete Knoten von momentaner Zustand))\\
-\emph{Falls} öffneKnoten(momentanerZustand,n) \(\neq\) momentanerZustand\\
+\emph{falls} öffneKnoten(momentanerZustand,n) \(\neq\) momentanerZustand\\
 \>\emph{liefere als Ergebnis}(öffneKnoten(momentanerZustand,n))
 \end{tabbing}}}
 \end{samepage}
 
 \begin{figure}[h]
-\includegraphics[scale=0.6]{a1.png}
+\includegraphics[scale=0.6]{greedyg.png}
 \caption{\textsc{Greedy Search} mit Gedächtnis}
 \end{figure}
 
@@ -448,21 +452,21 @@ Hier ist also\\
 \textbf{h(n) = (Enternung von n zum Ziel (Luftlinie) + Kantenlänge von Start bis n)}
 
 \emph{Bemerkung:}\\
-Man kann h auch beliebig anders wählen, A* bleibt aber nur solange optimal wie die Heuristik h der Dreiecksgleichung genügt, d.h. zu einer gegebenen Heuristik h und einer direkten Verbindung zweier Punkte A und B darf es keine andere Verbindung zwischen A und B mit einem Knoten C geben, bei der h(B über C) \textless h(B über A) gilt. Eine genauere Beschreibung und eine Möglichkeit derartige heuristische Funktionen zu korrigieren findet man in der Literatur ~\cite{Norv03}.
+Man kann h auch beliebig anders wählen, A* bleibt aber nur solange optimal wie die Heuristik h der Dreiecksgleichung genügt, d.h. zu einer gegebenen Heuristik h und einer direkten Verbindung zweier Punkte A und B darf es keine andere Verbindung zwischen A und B mit einem Knoten C geben, bei der h(B über C) \textless h(B über A) gilt. Eine genauere Beschreibung und eine Möglichkeit derartige heuristische Funktionen zu korrigieren findet man in ~\cite{Norv03ASD}.
 
 \begin{figure}[h]
 \includegraphics[scale=0.6]{3eck.png}
 \caption{Dreiecksungleichung und A*: A* ist optimal wenn h(b) \textless h(a) + h(c) für alle a,b,c, wobei c die kürzeste Verbindung von A nach C darstellt.}
 \end{figure}
 
-Ein Beispiel das zeigt, dass z.B. ,,Luftlinie`` nicht immer die kürzeste Verbindung darstellt, wäre das sogenannte \textsc{Brachistochrone} Problem, also die Frage nach dem \emph{schnellsten} Weg von A nach B:
+Ein Beispiel das zeigt, dass z.B. ,,Luftlinie'' nicht immer die kürzeste Verbindung darstellt, wäre das sogenannte \textsc{Brachistochrone} Problem, also die Frage nach dem \emph{schnellsten} Weg von A nach B:
 
 \begin{figure}[h]
 \includegraphics[scale=0.6]{Cycloid2Slope.png}
 \caption{\textsc{Brachistochrone} Problem - Was ist der \emph{schnellste} Weg von links nach rechts? ~\cite{evo}}
 \end{figure}
 
-Untersuchungen erbrachten die Ergebnisse, dass A* optimal und vollständig ist und auch, dass es keinen anderen optimalen und vollständigen Algorithmus gibt, der (für eine beliebige heuristische Funktion) die Aufgabe mit Expandierung von weniger Knoten schafft. ~\cite{Norv03}
+Untersuchungen erbrachten die Ergebnisse, dass A* optimal und vollständig ist und auch, dass es keinen anderen optimalen und vollständigen Algorithmus gibt, der (für eine beliebige heuristische Funktion) die Aufgabe mit Expandierung von weniger Knoten schafft. ~\cite{Norv03ASO}
 
 Im Folgenden wird nun anhand des bekannten Beispiels die Funktionsweise von dem \textsc{A* Search} Algorithmus demonstriert. Zahlen in den roten Knoten bedeuten wie vorher auch die Distanz mittels Luftlinie, in den grünen Knoten der Wert der heuristischen Funktion, bisherige Kantenlänge + Distanz Luftlinie. Ein * markiert einen Knoten, für den ein besserer Weg gefunden wurde.
 \\
@@ -495,13 +499,12 @@ Der Speicheraufwand lässt sich jedoch mit einem etwas abgewandelten Algorithmus 
 
 \textsc{IDA* Search} funktioniert im Grunde wie der bereits betrachtete \textsc{Iterative Deepening Search}, statt Knotentiefe als Grenze wird hier aber ein Kostenlimit gesetzt. Es werden also immer nur ein Bereich aus Knoten untersucht, deren Bewertungsfunktion h kleiner als das Kostenlimit ist. Das Speicherersparnis kommt natürlich um den Preis der Geschwindigkeit. Zwar werden pro Schritt weniger neue Knoten betrachtet, dafür müssen alle noch nicht besuchten Knoten in Suchtiefenreichweite neu berechnet werden. Dass dies keinen so großen Einfluß auf die Laufzeit hat, ergibt sich wie beim \textsc{Iterative Deepening Search} aus der Tatsache, dass in den meisten Fällen die unterste Ebene des Graphen die meisten Knoten enthält.
 
-Die Qualität des \textsc{Iterative Deepening A* Search} ergibt sich aus der Zahl der unterschiedlichen Werte die die Heuristikfunktion annehmen kann, da pro Schritt die Suchtiefe auf den nächstgrößeren Wert geschaltet wird. Eine Suche in Graphen mit reellwertiger Heuristikfunktion kann also zu einem unendlich langen Unterfangen werden, der Algorithmus ist also weder vollständig, noch optimal, wie folgendes Beispiel nochmals verdeutlicht:
-
-%~~ TODO Beispiel
+Die Qualität des \textsc{Iterative Deepening A* Search} ergibt sich aus der Zahl der unterschiedlichen Werte die die Heuristikfunktion annehmen kann, da pro Schritt die Suchtiefe auf den nächstgrößeren Wert geschaltet wird. Eine Suche in Graphen mit reellwertiger Heuristikfunktion kann also zu einem unendlich langen Unterfangen werden, der Algorithmus ist also weder vollständig, noch optimal. 
 
 \subsection{\textsc{Simplified Memory-Bounded A* Search}}
 
-\textsc{SMA* Search} verbraucht keine feste Speichermengenge, sondern passt sich an den verfügbaren Speicherplatz an, versucht also so viele Knoten wie möglich zu speichern. Der Algorithmus beginnt, falls der Speicherplatz knapp wird, bereits berechnete Teile des Graphen durch das jeweilige Minimum der Heuristikfunktionen aller enthaltenen Knoten zu ersetzen. Ist letzteres nie der Fall, arbeitet der Algorithmus also genau wie \textsc{A* Search} und ist vollständig, sofern genug Speicherplatz für die Lösung mit Suchtiefe m, also O(b*m) zur Verfügung steht. Er ist auch optimal nach ~\cite{Norv03}.
+Im Gegensatz zu A* verbraucht \textsc{SMA* Search} keine feste Speichermengenge, sondern passt sich an den verfügbaren Speicherplatz an, versucht also so viele Knoten wie möglich zu speichern. Der Algorithmus beginnt, falls der Speicherplatz knapp wird, bereits berechnete Teile des Graphen durch das jeweilige Minimum der Heuristikfunktionen aller enthaltenen Knoten zu ersetzen. Ist letzteres nie der Fall, arbeitet der Algorithmus also genau wie \textsc{A* Search} und ist vollständig, sofern genug Speicherplatz für die Lösung mit Suchtiefe m, also O(\(b*m\)) zur Verfügung steht und ist auch optimal nach ~\cite{Norv03SMA}.
+Bei sehr schwierigen Problemen versagt \textsc{SMA* Search} aber, dort wird es oft der Fall sein, dass zuerst scheinbar schlechte Knoten immer wieder aufgerollt und später wieder verworfen nur um dann wieder aufgerollt zu werden usw. Es kann also durch dieses Umverteilen des Speichers zu einer  überproportionalen Erhöhung der benötigten Rechenzeit kommen.
 
 \newpage
 \section{Algorithmen der 2. Gruppe - Schrittweise Verbesserung}
@@ -521,8 +524,8 @@ Losung alteLösung = erstelleZufälligeLösung()\\
 \emph{Wiederhole}\\
 \>Lösung neueLösung = i(alteLösung)\\
 \>\(\triangle\)= h(neueLösung) - h(alteLösung)\\
-\>\emph{Falls} selektion( T, \(\triangle\) ) == true\\
-\>\>\emph{Dann} alteLösung = neueLösung\\
+\>\emph{falls} selektion(T, \(\triangle\)) = true\\
+\>\>\emph{dann} alteLösung = neueLösung\\
 \emph{bis} alteLösung ausreichend gut\\
 \emph{liefere als Ergebnis}(alteLösung)
 \end{tabbing}}}
@@ -541,7 +544,7 @@ Der einfachste darauf basierende Algorithmus ist der sogenannte \textsc{Hill-Cli
 
 Hier in diesem Beispiel möchten Bergsteiger B, C und D zum höchsten Punkt A.
 
-\begin{figure}[h]
+\begin{figure}
 \includegraphics[scale=0.6]{berg.png}
 \caption{3 Bergsteiger auf der Suche nach dem Gipfel, Grundlage für Bild von  ~\cite{Berg}}
 \end{figure} 
@@ -550,15 +553,15 @@ Beim Hill-Climber ist T = 0 und die \textsc{Selection} Funktion sieht so aus:
 \begin{samepage}
 \textbf{\texttt{\begin{tabbing}\quad\quad\=\quad\kill
 Selection(T, \(\triangle\))\\
-\emph{Falls} \(\triangle\) \textless T\\
-\>\emph{liefere als Ergebnis}(true)\\
+\emph{falls} \(\triangle\) \textless T\\
+\>\emph{dann liefere als Ergebnis}(true)\\
 \emph{liefere als Ergebnis}(false)
 \end{tabbing}}}
 \end{samepage}
 
 Es werden also schlechtere Lösungen sofort verworfen, alle anderen weiterverwendet.
 
-\subsection{Probleme des Hill-Climbing Algorithmus}
+\subsection{Probleme des \textsc{Hill-Climbing} Algorithmus}
 
 Bei dem Algorithmus ergeben sich aber zwei schwerwiegende Probleme:
 
@@ -569,16 +572,16 @@ Betrachtet man hier Bergsteiger C und D werden diese, folgen sie der Ansteigung 
 Dies lässt sich beheben, indem man den Algorithmus nach einiger Zeit ohne Verbesserung einfach mit einer anderen Startkonfiguration/position neu beginnt, die beste Fitness der bisherigen Durchläufe aber speichert. Dann nennt man es einen \textsc{Random-Restart Hillclimbing} Algorithmus. In diesem Fall müsste C irgendwo zwischen E und F neustarten um auf direktem Wege zu A zu kommen.
 Problem bleibt hier festzustellen, ob wir denn in einem lokalen Optimum oder einer Kante stecken oder nicht schon kurz vor dem Ziel sind.
 
-\textbf{2. die Fitnesslandschaft ist oft sehr ,,wild`` also mit großen Gradientenunterschieden besetzt}
+\textbf{2. die Fitnesslandschaft ist oft sehr ,,wild'' also mit großen Gradientenunterschieden besetzt}
 
-Hier hilft auch kein zufälliges Neustarten mehr, man wird wahrscheinlich fast alle Lösungsmöglichkeiten durchsuchen müssen, der Algorithmus ist also wieder nicht viel besser als eine einfache zufällige Suche über dem Lösungsraum. Leider sind die meisten praktischen Probleme von dieser Art, somit liegt die Hauptschwierigkeit beim Hillclimber also nicht bei der Suche selbst sondern bei der Gestaltung der Problemstellung, so dass eine Fitnesslandschaft mit möglichst sanften Steigungen entsteht.
+Hier hilft auch kein zufälliges Neustarten mehr, man wird wahrscheinlich fast alle Lösungsmöglichkeiten durchsuchen müssen, der Algorithmus ist also wieder nicht viel besser als eine einfache zufällige Suche über dem Lösungsraum. Leider sind die meisten praktischen Probleme von dieser Art, somit liegt die Hauptschwierigkeit beim \textsc{Hill-Climbing} Algorithmus also nicht bei der Suche selbst sondern bei der Gestaltung der Problemstellung, so dass eine Fitnesslandschaft mit möglichst sanften Steigungen entsteht.
 
 \textbf{3. in der Fitnesslandschaft gibt es Plateaus}
 
 Auf Plateaus, also Gebieten mit gleichem Fitnesswert reduziert sich die Effektivität des \textsc{Hill-Climbers} auf die eines \textsc{Random-Walks} also einer rein zufälligen Suche, es gibt keinen Anhaltspunkt, ob eine Position der anderen überlegen ist.
 Mit Plateaus kann man im Algorithmus nur schwer umgehen, die beste Lösung ist, die Fitnesslandschaft z.B. durch Einführung zusätzlicher Faktoren die in die Bewertungsfunktion eingehen die Fitnesslandschaft selbst zu verändern. In diesem Fall ist B ziemlich ratlos, aber vielleicht weiss er ja, dass an der linken Seite der Mädelegabel ein leichtes Lüftlein pfeift wonach er sich orientieren könnte\dots 
 
-\subsection{Simulated Annealing Algorithmus}
+\subsection{\textsc{Simulated Annealing} Algorithmus}
 
 Ähnlich funktioniert auch das sogenannte \textsc{Simulated Annealing}, das ursprünglich aus der Physik kommt.
 Wird eine bessere Lösung gefunden, wird sie wie beim Hillclimber auf jeden Fall weiterverwendet, wird eine schlechtere Lösung gefunden, wird sie nicht sofort verworfen, sondern mit einer Wahrscheinlichkeit die der Parameter T angibt weiterverwendet.
@@ -587,28 +590,27 @@ Es werden für große T also praktisch alle Lösungen weiterverwendet, bis auf die,
 
 \begin{figure}
 \includegraphics[scale=0.6]{dame1.png}\includegraphics[scale=0.6]{dame2.png}
-\caption{Packungsproblem als Beispiel für ,,Simulated Annealing``}
+\caption{Packungsproblem als Beispiel für ,,Simulated Annealing''}
 \end{figure}
 
-Es gibt viele weitere Variationen von Selektion und T, auf die hier im speziellen nicht eingegangen wird, aber im Ausblick am Schluss noch einmal erwähnt werden.~~
+Es gibt viele weitere Variationen von Selektion und T, auf die hier im speziellen nicht eingegangen wird, aber im Ausblick am Schluss noch einmal erwähnt werden.
 
 \subsection{Heuristik des minimalen Konflikts bei CSPs}
 
-Heuristische Algorithmen der 2. Gruppe eignen sich sehr gut um \textsc{CSP} Probleme wie z.B. das n-Damenproblem zu lösen. Mit der nun beschriebenen Heuristik kann z.B. das Millionen-Damen Problem im Durschnitt mit weniger als 50 Schritten gelöst werden. ~\cite{Norv03}
-
-Wieder ist der Trick, nicht perfekte Lösungen zu suchen, sondern eine zufällige zu generieren diese Schritt für Schritt zu ,,reparieren`` (sogenanntes ,,heuristic repair`` ~cite{Norv03}).
-Das Optimierungsproblem zu n-Dameproblem lautet ,,Finde eine Position in der möglichst wenige Damen von möglichst wenigen anderen Damen geschlagen werden können``.
+Heuristische Algorithmen der 2. Gruppe eignen sich sehr gut um \textsc{CSP} Probleme wie z.B. das n-Damenproblem zu lösen. Mit der nun beschriebenen Heuristik kann z.B. das Millionen-Damen Problem im Durschnitt mit weniger als 50 Schritten gelöst werden. ~\cite{Norv03LCSP}
+Wieder ist der Trick, nicht perfekte Lösungen zu suchen, sondern eine zufällige zu generieren diese Schritt für Schritt zu ,,reparieren''.
+Das Optimierungsproblem zu n-Dameproblem lautet ,,Finde eine Position in der möglichst wenige Damen von möglichst wenigen anderen Damen geschlagen werden können''.
 
 Hier nun zur Übersicht ein Beispiel zum 4 Dameproblem in 5 Schritten:
 
 Während die roten Felder die Positionen der 4 Damen darstellen, geben die Zahlen den Wert der Heuristik an.
-Die Heuristik ist eine sogenannte ,,min conflicts``[6] Heuristik, die jeweils angibt, wieviele Bedingungen bei einer Konfiguration überschritten wird.
+Die Heuristik ist eine sogenannte ,,min conflicts''~\cite{Norv03LCSP} Heuristik, die jeweils angibt, wieviele Bedingungen bei einer Konfiguration überschritten wird.
 In diesem Fall entspricht dies der Zahl der Damen, die das Feld angreifen, bei roten Feldern inklusive dieser Dame selbst.
 Bei jedem Reperaturschritt der ungültigen Lösung wird nun für eine Dame einer zufälligen Spalte ein zufällig Feld mit niedrigerer oder gleicher Bewertung gewählt.
 
 %Programm evtl?
 
-\begin{figure}[h]
+\begin{figure}
 \includegraphics[scale=0.6]{dame1.png}\includegraphics[scale=0.6]{dame2.png}
 \caption{\textsc{CSP} mittels Heuristik des minimalen Konflikts}
 \end{figure}
@@ -617,7 +619,7 @@ In diesem Beispiel stehen alle 4 Damen in einer Diagonalen, also können z.B. in 
 Hier wurde die 2. Spalte gewählt und die Dame auf das niedriegere Feld in der 3. Zeile verschoben.
 Dass diese Heuristik scheinbar funktioniert, kann man auch daran erkennen, dass die Gesamtzahl der angegriffenen Damen sich von 16 nun auf 8 verringert hat:
 
-\begin{figure}[h]
+\begin{figure}
 \includegraphics[scale=0.6]{dame3.png}\includegraphics[scale=0.6]{dame4.png}
 \caption{\textsc{CSP} mittels Heuristik des minimalen Konflikts}
 \end{figure}
@@ -625,35 +627,38 @@ Dass diese Heuristik scheinbar funktioniert, kann man auch daran erkennen, dass 
 Im ersten Bild ist hier die Wahl der ersten Spalte zwingend, mit keiner anderen Dame findet man ein besseres Feld.
 In der Situation im zweiten Bild würde der \textsc{Hill-Climber} sich auf einem Plateau befinden und wäre nicht besser wie eine zufällige Suche. 
 
-\begin{figure}[h]
+\begin{figure}
 \includegraphics[scale=0.6]{dame5.png}\includegraphics[scale=0.6]{dame6.png}
 \caption{\textsc{CSP} mittels Heuristik des minimalen Konflikts}
 \end{figure}
 
 Im letzten Bild gibt es keine Verbesserung und der \textsc{Hill-Climber} läuft ohne Verbesserung bis zum Abbruch ohne Veränderung weiter. Da wir aber das Optimum, d.h. es gibt eine Lösung für das n-Damenproblem mit keiner Überschneidung, schon kennen und es hier auch abzählen können, sind wir fertig.
 
-\subsection{Verbesserte Hill-Climbing Algorithmen}
+\subsection{Verbesserte \textsc{Hill-Climbing} Algorithmen}
 
 Es gibt einige Verfeinerungen des \textsc{Hill-climbing} Algorithmus, besonders erwähnenswert sind die \textsc{evolutionären Algorithmen}. Diese finden z.B. Anwendung in komplexen praktischen Problemstellungen wie z.B. Betriebsplanoptimierung an der SAP schon länger erfolgreich arbeitet.  ~\cite{SAP}
 Grob gesagt, handelt es sich bei dabei um \textsc{Hill-climber}, der nicht jede Lösung verwirft, zusammen mit einer Breitensuche in Form von einer Population von konkurrierenden Lösungen.
 
 Die sogenannten \textsc{Genetic Algorithms} gehen noch einen Schritt weiter, trennen Phänotyp, also die endgültige Lösung, komplett vom Genotyp, der Datenstruktur, auf die die Mutationsoperatoren angewendet werden. Ausserdem fügen sie dem ganzen noch eine Art Gedächtnis in Form von dominant/rezessiver Gene, inaktiver Gene, sogenannter Introne, die nicht tatsächlich in einem Phänotyp kodiert werden, sondern nur als Mutationsschutz dienen, und mit einer Rekombination der Genstrukturen zweier Lösungen mittels \textsc{Crossing Over} hinzu.
-Genauer kann darauf hier leider nicht eingegangen werden, da es den Rahmen dieses Dokuments sprengen würde. Sehr empfehlenswert ist hierzu das Buch "Genetic Programming - An Introdution". ~\cite{Banz98}
+Genauer kann darauf hier leider nicht eingegangen werden, da es den Rahmen dieses Dokuments sprengen würde. Sehr empfehlenswert ist hierzu das Buch "Genetic Programming - An Introduction". ~\cite{Banz98}
 Auf jeden Fall sind in einigen Problemgebieten, verglichen mit anderen Suchstrategien, sehr erfolgreich, denn welch anderer Algorithmus kann schon Vorträge über sich selbst halten?
 
 \newpage
 \section{Zusammenfassung}
 
 \subsection{Allgemeine Suchalgorithmen}
-Im ersten Teil wurden uns verschiedene allgemeine Suchalgorithmen vorgestellt. Diese Algorithmen haben alle die Gemeinsamkeit, dass sie den Zustandsraum gewissermaÃ~_en blind durchsuchen. Die unterschiedlichen Algorithmen legen dabei verschiedene Suchstrategien an den Tag. So wird bei der \textsc{Breitensuche} der Suchbaum Ebene fÃ¼r Ebene durchsucht. Das hat den Vorteil, das es sich um einen Vollstaendigen Algorithmus handelt. Allerdings den Nachteil, das wir mit einem gewaltigen Speicheraufwand zu kÃ¤mpfen haben. Ein Ã~Dhnliches Suchverfahren ist die \textsc{Uniform-cost Search}. Sie ist aus dem Dijekstra Algorithmus hervorgegangen und wird verwendet um Graphen zu durchsuchen. Im Gegensatz zur Breitensuche wird hierbei jedoch eine Kostenfunktion verwendet um zu entscheiden welcher Knoten als nÃ¤chstes geÃ¶ffnet wird.
-Eine andere Strategie ist die der \textsc{Tiefensuche}. Die Tiefensuche oeffnet zuerst alle Knoten bis der entsprechende Knoten keine Kinder mehr hat. Der baum wird also "Astweise" bzw wie ein Faecher durchsucht. Diese Strategie bietet den groÃ~_en Vorteil, dass ihr Speicheraufwand im Gegensatz zur breitensuche nur verschwindend gering ist. Problematisch wird es jedoch, wenn der Suchbaum einen Unendlich langen Ast hat. An dieser stelle ist die Tiefensuche dann nÃ¤mlich zum Scheitern verurteilt.
-Um dieses Problem zu beheben, hat man die \textsc{Begrenzte Tiefensuche} entwickelt. Sie durchsucht den Suchbaum nur bis zu einer festgelegten Tiefe und verhaelt sich dann, als haette der Suchbaum keine tieferen Ã~Dste. Diese Form der suche eignet sich besonders, wenn man die Tiefe des Zieles kennt. Ansonsten kann es leicht passieren, das das suchziel leider tiefer als das Limit liegt und somit nicht gefunden wird.
-Bei der \textsc{Iterativen Tiefensuche} handelt es sich um eine Erweiterung der Tiefensuche, welche die Vorteile einer Breitensuche mit dem Speicheraufwand der Tiefensuche verbindet. Sie Verwendet eine begrenzte Tiefensuche, wobei das tiefenlimit Schritt fÃ¼r Schritt erhÃ¶ht wird. Die Tatsache, dass die Iterative Tiefensuche VollstÃ¤ndig ist und einen so geringen Speicheraufwand vorweist, macht sie zur hÃ¤ufig bevorzugten Suchstrategie.
-Des weiteren wurde noch die \textsc{Bidirektionale Suche} erwÃ¤hnt, die sich, sofern sie denn Anwendbar ist, als sehr vorteilhaft erweisen kann. Ihre Grundidee ist, das man zwei Suchen gleichzeitig startet. Die eine vom Ziel und sie Andere von der Ausgangssituation. Diese beiden Suchen mÃ¼ssen dann nur einander finden. Der Zeit und Speicheraufwand entspricht dabei dann nur der Wurzel aus den AufwÃ¤nden fÃ¼r eine Breitensuche. Ihre Andwendbarkeit ist jedoch auf Probleme begrenzt, die bei denen sich ein explizites Suchziel definieren lÃ¤sst.
-                                                                                                                                                            
-ZusÃ¤tzlich zu den unterschiedlichen Suchverfahren haben wir uns kurz mit dem Unterbinden von Schleifen bei der suche beschÃ¤fftigt. Dies ist wichtig, um zu verhindern, das eine Suche evtl. einen suchZustand mehrmals durchsucht. selbst einfache Probleme kÃ¶nnen unlÃ¶sbar werden, wenn ein Algorithmus sich in einer Schleife verfÃ¤ngt aus der er nicht wieder herrauskommt. Eine LÃ¶sung dieses Problemes besteht im Anlegen einer Hash Tabelle, welche die schon durchsuchten ZustÃ¤nde enthÃ¤lt.
-Zu guter letzt sind wir noch kurz auf \textsc{Constraint Satisfaction Probleme} eingegangen, welche eine bestimmte Variablenmenge und eine MÃ¶glichkeit diese zu belegen beinhalten. Bei CSP kann man spezielle techniken bei der Suche anwenden um die Anzahl der "Sackgassen" welche ein Suchalgorithmus beschreitet zu verringern. Dazu gehÃ¶ren \textsc{Backtracking Search} und \textsc{Forward checking}. Anhand des 4-Damen Problemes haben wir gezeigt, wie beim Backtracking LÃ¶sungen, die sich von vorne herein als falsch erweisen nicht weiter dursucht werden, bzw. wie beim Forwardchecking Ã¼berprÃ¼ft wird, ob sich eine LÃ¶sung Ã¼berhaupt noch als richtig erweisen kann.
+Im ersten Teil wurden uns verschiedene \emph{allgemeine Suchalgorithmen} vorgestellt. Diese Algorithmen haben alle die Gemeinsamkeit, dass sie den Zustandsraum gewissermaßen blind durchsuchen. Die unterschiedlichen Algorithmen legen dabei verschiedene Suchstrategien an den Tag, so wird bei der \textsc{Breitensuche} der Suchbaum Ebene für Ebene durchsucht, was den Vorteil hat, dass es sich um einen \emph{vollständigen} Algorithmus handelt. Dies hat allerdings den Nachteil, dass wir mit einem gewaltigen Speicheraufwand zu kämpfen haben. Ein ähnliches Suchverfahren ist der \textsc{Uniform-cost Search}. Sie ist aus dem \textsc{Dijkstra Algorithmus} hervorgegangen und wird verwendet um Graphen zu durchsuchen. Im Gegensatz zur Breitensuche wird hierbei jedoch eine Kostenfunktion verwendet um zu entscheiden welcher Knoten als nächstes geöffnet wird.
 
+Eine andere Strategie ist die der \textsc{Tiefensuche}. Die Tiefensuche öffnet zuerst alle Knoten bis der entsprechende Knoten keine Kinder mehr hat. Der Baum wird also astweise bzw. wie ein Fächer durchsucht. Diese Strategie bietet den großen Vorteil, dass ihr Speicheraufwand im Gegensatz zur Breitensuche nur verschwindend gering ist. Problematisch wird es jedoch, wenn der Suchbaum einen unendlich langen Ast hat. An dieser Stelle ist die Tiefensuche dann nämlich zum Scheitern verurteilt.
+
+Um dieses Problem zu beheben hat man die \textsc{Begrenzte Tiefensuche} entwickelt. Sie durchsucht den Suchbaum nur bis zu einer festgelegten Tiefe und verhält sich dann als hätte der Suchbaum keine tieferen Äste. Diese Form der Suche eignet sich besonders, wenn man die Tiefe des Zieles kennt. Ansonsten kann es leicht passieren, dass das Suchziel leider tiefer als das Limit liegt und somit nicht gefunden wird.
+
+Bei der \textsc{Iterativen Tiefensuche} handelt es sich um eine Erweiterung der Tiefensuche, welche die Vorteile einer Breitensuche mit dem Speicheraufwand der Tiefensuche verbindet. Sie verwendet eine begrenzte Tiefensuche, wobei das Tiefenlimit Schritt für Schritt erhöht wird. Die Tatsache, dass die \textsc{Iterative Tiefensuche} vollständig ist und einen so geringen Speicheraufwand vorweist, macht sie zur häufig bevorzugten Suchstrategie.
+
+Des weiteren wurde noch die \textsc{Bidirektionale Suche} erwähnt, die sich, sofern sie denn anwendbar ist, als sehr vorteilhaft erweisen kann. Ihre Grundidee ist, dass man zwei Suchen gleichzeitig startet, die eine vom Ziel und die andere von der Ausgangssituation. Diese beiden Suchen müssen dann nur noch einander finden. Der Zeit und Speicheraufwand entspricht dabei dann nur der Wurzel aus den Aufwänden für eine Breitensuche. Ihre Andwendbarkeit ist jedoch auf Probleme begrenzt, bei denen sich ein explizites Suchziel definieren lässt.
+                                                                                                                                                            
+Zusätzlich zu den unterschiedlichen Suchverfahren haben wir uns kurz mit dem Unterbinden von Schleifen bei der Suche beschäftigt. Dies ist wichtig, um zu verhindern, dass eine Suche eventuell einen Suchzustand mehrmals durchsucht. Selbst einfache Probleme können unlösbar werden, wenn ein Algorithmus sich in einer Schleife verfängt aus der er nicht wieder herrauskommt. Eine Lösung dieses Problemes besteht im Anlegen einer Hash Tabelle, welche die schon durchsuchten Zustände enthält.
+Zu guter Letzt sind wir noch kurz auf \textsc{Constraint Satisfaction Probleme} eingegangen, welche eine bestimmte Variablenmenge und eine Möglichkeit diese zu belegen beinhalten. Bei CSP kann man spezielle Techniken bei der Suche anwenden um die Anzahl der \emph{Sackgassen} welche ein Suchalgorithmus beschreitet zu verringern. Dazu gehören \textsc{Backtracking Search} und \textsc{Forward checking}. Anhand des \emph{4-Damen Problems} haben wir gezeigt, wie beim \textsc{Backtracking Search} Lösungen, die sich von vorne herein als falsch erwiesen haben nicht weiter dursucht werden, bzw. wie beim \textsc{Forward Checking} überprüft wird, ob sich eine Lösung überhaupt noch als richtig erweisen kann.
 
 
 \newpage
@@ -667,7 +672,7 @@ Indem die Idee des \textsc{Uniform Cost Search} Algorithmus, den bisherigen Weg 
 
 Dagegen wurden gleich zwei Möglichkeiten aufgezeigt, einerseits der \textsc{Iterative Deepening A* Search}, der auf Kosten der Vollständigkeit, Optimalität und Berechnungszeit den Speicherverbrauch stark reduzierte. Eine klügere Herangehensweise hatte dagegen der \textsc{Simplified Memory-Bounded A* Search} an den Tag gelegt, in dem er einfach so viel wie verfügbar Speicherplatz verwendete und, wieder auf Kosten der Geschwindigkeit, Knoten die wahrscheinlich nicht Teil der Lösung waren vergaß. Es wurde gezeigt, dass der Algorithmus sogar optimal und vollständig ist, falls genug Speicher zur Verfugung steht.
 
-Anschließend wendeten wir uns den Algorithmen zu, die die Lösung nicht schrittweise aufbauten sondern schrittweise ,,reparierten``. Das Problem wurde dabei als Optimierungsproblem umschrieben und es wurden fertige Lösungen meist durch Zufall generiert und deren Qualität bestimmt. Die meisten Algorithmen die darunter fallen sind nicht optimal oder vollständig, da sie auf Zufall basieren. 
+Anschließend wendeten wir uns den Algorithmen zu, die die Lösung nicht schrittweise aufbauten sondern schrittweise ,,reparierten''. Das Problem wurde dabei als Optimierungsproblem umschrieben und es wurden fertige Lösungen meist durch Zufall generiert und deren Qualität bestimmt. Die meisten Algorithmen die darunter fallen sind nicht optimal oder vollständig, da sie auf Zufall basieren. 
 
 Der \textsc{Hill-climbing} Algorithmus verwarf die schlechteren Lösungen einfach und veränderte die (scheinbar) guten Lösungen rekursiv weiter. Zwar konnte man durch den \textsc{Random restart Hill-climbing} gewisse lokale Optima vermeiden, die eigentliche Hauptarbeit zur Vermeidung lokaler Optima liegt jedoch nicht beim Gestalten des Suchalgorithmus sondern des Lösungsraums selbst. 
 
@@ -678,6 +683,17 @@ Zum Schluss wurde ein Ausblick auf verbesserte Algorithmen dieser Art gemacht, d
 \begin{thebibliography}{99}
 \bibitem{Norv03} {\sc Russel S., Norvig P.:}  \textit{Artificial Intelligence -- A Modern Approach}, 
 Second Edition, Prentice Hall, 2003.
+\bibitem{Norv03tab} {\sc Russel S., Norvig P. 2003:}  Seite 74 ,,Time and memory requirements''
+\bibitem{Norv03ASD} {\sc Russel S., Norvig P. 2003:}  Seite 99 ,,triangle inequality''
+\bibitem{Norv03ASO} {\sc Russel S., Norvig P. 2003:}  Seite 101 ,,A* is optimally efficient''
+\bibitem{Norv03SMA} {\sc Russel S., Norvig P. 2003:}  Seite 104 ,,SMA* is optimally efficient''
+\bibitem{Norv038P} {\sc Russel S., Norvig P. 2003:}  Seite 105 ,,8-puzzle''
+\bibitem{Norv03SC} {\sc Russel S., Norvig P. 2003:}  Seite 107 ,,Comparison of the search costs''
+\bibitem{Norv03MHD} {\sc Russel S., Norvig P. 2003:}  Seite 108 ,,Manhattan-distance''
+\bibitem{Norv03ABS} {\sc Russel S., Norvig P. 2003:}  Seite 108 ,,ABSOLVER''
+\bibitem{Norv03LCSP} {\sc Russel S., Norvig P. 2003:}  Seite 150 ,,Min-conflicts''
+\bibitem{evo} {\sc Brantacan.co.uk} \textit{Evolution  of  Bridges  and  Other  Things},
+http://www.brantacan.co.uk/evolution.htm -  ,,brachistochrone''
 \bibitem{Worldmap} {\sc Brion L. Vibber:}  \textit{Maps of the World},
 http://leuksman.com/misc/maps.php
 \bibitem{Berg} {\sc D. Jonderko:}  \textit{bergfieber.de},
@@ -691,4 +707,3 @@ Morgan Kaufmann Publishers, Inc. 1998
 \end{thebibliography}
 %TODO: Fett/Kursiv rein, Sonderzeichen etc.
 \end{document}
-
